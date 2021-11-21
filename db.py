@@ -104,14 +104,16 @@ def get_pods_from_namespace(namespace):
     take_pod_action(namespace, pod)
 
 def take_pod_action(namespace, pod):
-    p.cprint('Available action for pod ' + pod + ' in namespace ' + namespace, p.bcolors.OKGREEN)
+    p.cprint('Available actions for pod ' + pod + ' in namespace ' + namespace, p.bcolors.OKGREEN)
     p.cprint('[1] Interactive terminal', p.bcolors.BOLD)
     command = commands['interactive-terminal']
     command[3] = namespace
     command[5] = pod
     try:
         ouput = subprocess.check_call(command)
-    except subprocess.CalledProcessError as e:
+    except Exception as e:
+        p.cprint('Ran:', p.bcolors.WARNING)
+        print(' '.join(output.args))
         p.cprint('Something went wrong \n' + e, p.bcolors.FAIL)
 
 def test():
