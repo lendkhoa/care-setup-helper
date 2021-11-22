@@ -15,7 +15,9 @@ commands = {
     "feature-staging": ["tm-kubectx", "-e", "feature-staging"],
     "get-namespaces": ["kubectl", "get", "namespaces"],
     "get-pods-from-namespace": ["kubectl", "get", "pods","-n"],
-    "interactive-terminal": ["kubectl", "exec", "-n", "$NAME_SPACE", "-it", "$POD", "--", "bash", "-c", "/bin/bash"]
+    "interactive-terminal": ["kubectl", "exec", "-n", "$NAME_SPACE", "-it", "$POD", "--", "bash", "-c", "/bin/bash"],
+    "generate-snap": ["pg_dump", "$DATABASE_URL", ">", "snap.sql"],
+    "cp-snap": ["kubectl", "cp", "$NAME_SPACE/", "$POD:/", "$SERVICE", "/snap.sql"," ",  "./snap.sql"],
 }
 
 def actions():
@@ -70,12 +72,12 @@ def get_namespaces(kmg_filter):
             for l in kmg:
                 p.cprint("[" + str(kmg_i) + "] " + l, p.bcolors.BOLD)
                 kmg_i += 1
-            get_pods_from_namespace(kmg[int(raw_input()) - 1])
+            get_pods_from_namespace(kmg[int(raw_input())])
         else:
             for l in others:
                 p.cprint("[" + str(o_j) + "] " + l, p.bcolors.BOLD)
                 o_j += 1
-            get_pods_from_namespace(others[int(raw_input()) - 1])
+            get_pods_from_namespace(others[int(raw_input())])
 
     except subprocess.CalledProcessError as e:
         p.cprint('Something went wrong', p.bcolors.FAIL)
@@ -105,32 +107,35 @@ def get_pods_from_namespace(namespace):
 
 def take_pod_action(namespace, pod):
     p.cprint('Available actions for pod ' + pod + ' in namespace ' + namespace, p.bcolors.OKGREEN)
-    p.cprint('[1] Interactive terminal', p.bcolors.BOLD)
-    command = commands['interactive-terminal']
-    command[3] = namespace
-    command[5] = pod
+    p.cprint('[1] Interactive terminal', p.bcolors.WARNING)
+    p.cprint('[2] Cp snap.sql to local', p.bcolors.WARNING)
+    p.cprint('q to quit', p.bcolors.WARNING)
+
+    pod_action = raw_input()
+    if 'q' in pod_action: quit()
+    pod_action = int(pod_action)
     try:
-        ouput = subprocess.check_call(command)
+        if pod_action == 1:
+            command = commands['interactive-terminal']
+            command[3] = namespace
+            command[5] = pod
+            p.cprint('Opening interactive terminal for pod ' + pod, p.bcolors.OKGREEN)
+            p.cprint('Run pg_dump $DATABASE_URL > snap.sql to generate new dump', p.bcolors.WARNING)
+            ouput = subprocess.check_call(command)
+        elif pod_action == 2:
+            command = commands['cp-snap']
+            command[3] = namespace
+            command[5] = pod
+            p.cprint('Downloading snap.sql on pod ' + pod, p.bcolors.OKGREEN)
+            ouput = subprocess.check_call(command)
+
     except Exception as e:
-        p.cprint('Ran:', p.bcolors.WARNING)
-        print(' '.join(output.args))
         p.cprint('Something went wrong \n' + e, p.bcolors.FAIL)
 
-def test():
-    nums = [
-        "NAME                                       READY   STATUS    RESTARTS   AGE",
-        "cove-kmg-1298-857fbb874f-ksq5s             2/2     Running   0          28h",
-        "dashboard-kmg-1298-554db85dd8-qtxwl        2/2     Running   0          2d2h"
-    ]
-    numpy.delete(nums, 0)
 
-    while True:
-        for idx, lin in enumerate(nums):
-            print(lin)
-        a = raw_input()
-        if "r" in a:
-            exit()
-        print(">>> " + a)
+def test():
+    subprocess.check_output(["./test.bsh"])
+
 
 
 if __name__ == '__main__':
