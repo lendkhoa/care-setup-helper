@@ -14,7 +14,7 @@ import numpy
 commands = {
     "feature-staging": ["tm-kubectx", "-e", "feature-staging"],
     "get-namespaces": ["kubectl", "get", "namespaces"],
-    "get-pods-from-namespace": ["kubectl", "get", "pods","-n"],
+    "get-pods-from-namespace": ["kubectl", "get", "pods","-n", "$NAME_SPACE"],
     "interactive-terminal": ["kubectl", "exec", "-n", "$NAME_SPACE", "-it", "$POD", "--", "bash", "-c", "/bin/bash"],
     "generate-snap": ["pg_dump", "$DATABASE_URL", ">", "snap.sql"],
     "cp-snap": ["kubectl", "cp", "$NAME_SPACE/", "$POD:/", "$SERVICE", "/snap.sql"," ",  "./snap.sql"],
@@ -69,6 +69,7 @@ def get_namespaces(kmg_filter):
                 others.append(line)
 
         if kmg_filter:
+            print(">>> 1")
             for l in kmg:
                 p.cprint("[" + str(kmg_i) + "] " + l, p.bcolors.BOLD)
                 kmg_i += 1
@@ -79,6 +80,7 @@ def get_namespaces(kmg_filter):
             if 'q' in action: quit()
             get_pods_from_namespace(kmg[int(action)])
         else:
+            print(">>> 2")
             for l in others:
                 p.cprint("[" + str(o_j) + "] " + l, p.bcolors.BOLD)
                 o_j += 1
@@ -97,9 +99,9 @@ def get_pods_from_namespace(namespace):
 
     namespace = namespace[0:namespace.index('Active')].strip()
     p.cprint('Getting pods from ' + namespace + '...', p.bcolors.OKGREEN)
-    query = commands["get-pods-from-namespace"]
-    query.append(namespace)
-    output = subprocess.check_output(query).splitlines()
+    commands["get-pods-from-namespace"][4] = namespace
+    command = commands["get-pods-from-namespace"]
+    output = subprocess.check_output(command).splitlines()
 
     # 1 indexed
     i = 1
