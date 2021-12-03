@@ -72,12 +72,22 @@ def get_namespaces(kmg_filter):
             for l in kmg:
                 p.cprint("[" + str(kmg_i) + "] " + l, p.bcolors.BOLD)
                 kmg_i += 1
-            get_pods_from_namespace(kmg[int(raw_input())])
+            p.cprint("r to return", p.bcolors.WARNING)
+            p.cprint("q to quit", p.bcolors.WARNING)
+            action = raw_input()
+            if 'r' in action: return
+            if 'q' in action: quit()
+            get_pods_from_namespace(kmg[int(action)])
         else:
             for l in others:
                 p.cprint("[" + str(o_j) + "] " + l, p.bcolors.BOLD)
                 o_j += 1
-            get_pods_from_namespace(others[int(raw_input())])
+            p.cprint("r to return", p.bcolors.WARNING)
+            p.cprint("q to quit", p.bcolors.WARNING)
+            action = raw_input()
+            if 'r' in action: return
+            if 'q' in action: quit()
+            get_pods_from_namespace(others[int(action)])
 
     except subprocess.CalledProcessError as e:
         p.cprint('Something went wrong', p.bcolors.FAIL)
@@ -98,9 +108,16 @@ def get_pods_from_namespace(namespace):
             p.cprint('   ' + line, p.bcolors.BOLD)
             continue
 
-        p.cprint("[" + str(i) + "] " + line, p.bcolors.BOLD)
+        print("[" + str(i) + "] " + line)
         i+=1
-    pod = output[int(raw_input())]
+
+    p.cprint("r to return", p.bcolors.WARNING)
+    p.cprint("q to quit", p.bcolors.WARNING)
+    action = raw_input()
+    if 'r' in action: return
+    if 'q' in action: quit()
+
+    pod = output[int(action)]
     pod = pod[0:pod.index('  ')].strip()
 
     take_pod_action(namespace, pod)
@@ -120,7 +137,6 @@ def take_pod_action(namespace, pod):
             command[3] = namespace
             command[5] = pod
             p.cprint('Opening interactive terminal for pod ' + pod, p.bcolors.OKGREEN)
-            p.cprint('Run pg_dump $DATABASE_URL > snap.sql to generate new dump', p.bcolors.WARNING)
             ouput = subprocess.check_call(command)
         elif pod_action == 2:
             command = commands['cp-snap']
@@ -131,7 +147,6 @@ def take_pod_action(namespace, pod):
 
     except Exception as e:
         p.cprint('Something went wrong \n' + e, p.bcolors.FAIL)
-
 
 def test():
     subprocess.check_output(["./test.bsh"])
