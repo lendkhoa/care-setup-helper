@@ -9,7 +9,6 @@ Version: Nov 19, 2021
 
 import cprint as p
 import subprocess
-import numpy
 
 commands = {
     "feature-staging": ["tm-kubectx", "-e", "feature-staging"],
@@ -69,9 +68,9 @@ def get_namespaces(kmg_filter):
                 others.append(line)
 
         if kmg_filter:
-            print(">>> 1")
             for l in kmg:
-                p.cprint("[" + str(kmg_i) + "] " + l, p.bcolors.BOLD)
+                l = "[" + str(kmg_i) + "]=>" + l
+                print("{: <20} {: >20} {: >20}".format(*l.split()))
                 kmg_i += 1
             p.cprint("r to return", p.bcolors.WARNING)
             p.cprint("q to quit", p.bcolors.WARNING)
@@ -80,9 +79,9 @@ def get_namespaces(kmg_filter):
             if 'q' in action: quit()
             get_pods_from_namespace(kmg[int(action)])
         else:
-            print(">>> 2")
             for l in others:
-                p.cprint("[" + str(o_j) + "] " + l, p.bcolors.BOLD)
+                l = "[" + str(o_j) + "]=>" + l
+                print("{: <50} {: >20} {: >20}".format(*l.split()))
                 o_j += 1
             p.cprint("r to return", p.bcolors.WARNING)
             p.cprint("q to quit", p.bcolors.WARNING)
@@ -96,23 +95,23 @@ def get_namespaces(kmg_filter):
 
 def get_pods_from_namespace(namespace):
     if 'q' in namespace: quit()
-
     namespace = namespace[0:namespace.index('Active')].strip()
     p.cprint('Getting pods from ' + namespace + '...', p.bcolors.OKGREEN)
     commands["get-pods-from-namespace"][4] = namespace
     command = commands["get-pods-from-namespace"]
     output = subprocess.check_output(command).splitlines()
-
     # 1 indexed
     i = 1
-    for idx, line in enumerate(output):
+    for line in output:
         if 'NAME' in line:
-            p.cprint('   ' + line, p.bcolors.BOLD)
+            print("{: <70} {: >20} {: >20} {: >20} {: >10}".format(*line.split()))
             continue
 
-        print("[" + str(i) + "] " + line)
+        line = "[" + str(i) + "]=>" + line
+        print("{: <70} {: >20} {: >20} {: >20} {: >10}".format(*line.split()))
         i+=1
 
+    p.cprint("> Last Ran: " + " ".join(command), p.bcolors.OKGREEN)
     p.cprint("r to return", p.bcolors.WARNING)
     p.cprint("q to quit", p.bcolors.WARNING)
     action = raw_input()
@@ -127,28 +126,24 @@ def get_pods_from_namespace(namespace):
 def take_pod_action(namespace, pod):
     p.cprint('Available actions for pod ' + pod + ' in namespace ' + namespace, p.bcolors.OKGREEN)
     p.cprint('[1] Interactive terminal', p.bcolors.WARNING)
-    p.cprint('[2] Cp snap.sql to local', p.bcolors.WARNING)
     p.cprint('q to quit', p.bcolors.WARNING)
 
-    pod_action = raw_input()
-    if 'q' in pod_action: quit()
-    pod_action = int(pod_action)
     try:
+        pod_action = raw_input()
+        if 'q' in pod_action: quit()
+        pod_action = int(pod_action)
         if pod_action == 1:
             command = commands['interactive-terminal']
             command[3] = namespace
             command[5] = pod
             p.cprint('Opening interactive terminal for pod ' + pod, p.bcolors.OKGREEN)
             ouput = subprocess.check_call(command)
-        elif pod_action == 2:
-            command = commands['cp-snap']
-            command[3] = namespace
-            command[5] = pod
-            p.cprint('Downloading snap.sql on pod ' + pod, p.bcolors.OKGREEN)
-            ouput = subprocess.check_call(command)
+        else:
+            p.cprint('Error undefined option' + pod, p.bcolors.FAIL)
 
     except Exception as e:
         p.cprint('Something went wrong \n' + e, p.bcolors.FAIL)
+        return
 
 def test():
     subprocess.check_output(["./test.bsh"])
