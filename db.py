@@ -136,6 +136,7 @@ def take_pod_action(namespace, pod):
             command = commands['interactive-terminal']
             command[3] = namespace
             command[5] = pod
+            p.cprint("> Last Ran: " + " ".join(command), p.bcolors.OKGREEN)
             p.cprint('Opening interactive terminal for pod ' + pod, p.bcolors.OKGREEN)
             ouput = subprocess.check_call(command)
         else:
