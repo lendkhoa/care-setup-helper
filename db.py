@@ -12,6 +12,7 @@ import subprocess
 
 commands = {
     "feature-staging": ["tm-kubectx", "-e", "feature-staging"],
+    "production": ["tm-kubectx", "-e", "production"],
     "get-namespaces": ["kubectl", "get", "namespaces"],
     "get-pods-from-namespace": ["kubectl", "get", "pods","-n", "$NAME_SPACE"],
     "interactive-terminal": ["kubectl", "exec", "-n", "$NAME_SPACE", "-it", "$POD", "--", "bash", "-c", "/bin/bash"],
@@ -23,9 +24,10 @@ def actions():
     p.cprint("______________________________________________", p.bcolors.BOLD)
     p.cprint("Actions:", p.bcolors.BOLD)
     p.cprint("[1] Connect to feature-staging", p.bcolors.WARNING)
-    p.cprint("[2] Get namespaces", p.bcolors.WARNING)
-    p.cprint("[3] Get KMG namespaces", p.bcolors.WARNING)
-    p.cprint("[4] Test", p.bcolors.WARNING)
+    p.cprint("[2] Connect to production - (VPN connection)", p.bcolors.WARNING)
+    p.cprint("[3] Get namespaces", p.bcolors.WARNING)
+    p.cprint("[4] Get KMG namespaces", p.bcolors.WARNING)
+    p.cprint("[5] Test", p.bcolors.WARNING)
     p.cprint("\n q to quit", p.bcolors.WARNING)
 
 def main():
@@ -36,14 +38,20 @@ def main():
         if '1' in action:
             tm_kube_feature_staging()
         elif '2' in action:
-            get_namespaces('')
         elif '3' in action:
-            get_namespaces('kmg')
+            get_namespaces('')
         elif '4' in action:
+            get_namespaces('kmg')
+        elif '5' in action:
             test()
         if 'q' in action:
             stop = True
             quit()
+
+def tm_kube_production():
+    p.cprint('Connecting to tm-k8s production ...', p.bcolors.HEADER)
+    output = subprocess.check_output(commands['production'])
+    p.cprint(output, p.bcolors.OKGREEN)
 
 def tm_kube_feature_staging():
     p.cprint('Connecting to tm-k8s feature-staging ...', p.bcolors.HEADER)
