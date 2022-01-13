@@ -38,6 +38,7 @@ def main():
         if '1' in action:
             tm_kube_feature_staging()
         elif '2' in action:
+            tm_kube_production()
         elif '3' in action:
             get_namespaces('')
         elif '4' in action:
