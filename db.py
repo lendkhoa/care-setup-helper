@@ -103,7 +103,6 @@ def get_namespaces(kmg_filter):
         p.cprint('Something went wrong', p.bcolors.FAIL)
 
 def get_pods_from_namespace(namespace):
-    if 'q' in namespace: quit()
     namespace = namespace[0:namespace.index('Active')].strip()
     p.cprint('Getting pods from ' + namespace + '...', p.bcolors.OKGREEN)
     commands["get-pods-from-namespace"][4] = namespace
