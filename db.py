@@ -17,6 +17,7 @@ commands = {
     "get-namespaces": ["kubectl", "get", "namespaces"],
     "get-pods-from-namespace": ["kubectl", "get", "pods","-n", "$NAME_SPACE"],
     "interactive-terminal": ["kubectl", "exec", "-n", "$NAME_SPACE", "-it", "$POD", "--", "bash", "-c", "/bin/bash"],
+    "pod-logs": ["kubectl", "-n", "$NAME_SPACE", "logs", "$POD"],
     "generate-snap": ["pg_dump", "$DATABASE_URL", ">", "snap.sql"],
     "cp-snap": ["kubectl", "cp", "$NAME_SPACE/", "$POD:/", "$SERVICE", "/snap.sql"," ",  "./snap.sql"],
 }
@@ -143,6 +144,7 @@ def get_pods_from_namespace(namespace):
 def take_pod_action(namespace, pod):
     p.cprint('Available actions for pod ' + pod + ' in namespace ' + namespace, p.bcolors.OKGREEN)
     p.cprint('[1] Interactive terminal', p.bcolors.WARNING)
+    p.cprint('[2] Logs', p.bcolors.WARNING)
     p.cprint('q to quit', p.bcolors.WARNING)
 
     try:
@@ -156,6 +158,13 @@ def take_pod_action(namespace, pod):
             p.cprint("> Last Ran: " + " ".join(command), p.bcolors.OKGREEN)
             p.cprint('Opening interactive terminal for pod ' + pod, p.bcolors.OKGREEN)
             ouput = subprocess.check_call(command)
+        elif pod_action == 2:
+            command = commands['pod-logs']
+            command[2] = namespace
+            command[4] = pod
+            p.cprint("> Last Ran: " + " ".join(command), p.bcolors.OKGREEN)
+            p.cprint('Logs for pod ' + pod, p.bcolors.OKGREEN)
+            print(subprocess.check_call(command))
         else:
             p.cprint('Error undefined option' + pod, p.bcolors.FAIL)
 
