@@ -59,26 +59,26 @@ def main():
 def tm_kube_demo():
     p.cprint('Connecting to tm-k8s demo ...', p.bcolors.HEADER)
     output = subprocess.check_output(commands['demo'])
-    add_to_cache('connect-demo', " ".join(commands['demo']))
+    add_to_cache('demo', " ".join(commands['demo']))
     p.cprint(output, p.bcolors.OKGREEN)
 
 def tm_kube_production():
     p.cprint('Connecting to tm-k8s production ...', p.bcolors.HEADER)
     output = subprocess.check_output(commands['production'])
-    add_to_cache('connect-production', " ".join(commands['production']))
+    add_to_cache('prod', " ".join(commands['production']))
     p.cprint(output, p.bcolors.OKGREEN)
 
 def tm_kube_feature_staging():
     p.cprint('Connecting to tm-k8s feature-staging ...', p.bcolors.HEADER)
     output = subprocess.check_output(commands['feature-staging'])
-    add_to_cache('connect-staging', " ".join(commands['feature-staging']))
+    add_to_cache('staging', " ".join(commands['feature-staging']))
     p.cprint(output, p.bcolors.OKGREEN)
 
 def get_namespaces(kmg_filter):
     p.cprint('Getting KMG namespaces...' if kmg_filter else 'Getting namespaces...', p.bcolors.OKGREEN)
     try:
         output = subprocess.check_output(commands["get-namespaces"])
-        add_to_cache('get-namespaces', " ".join(commands['get-namespaces']))
+        add_to_cache('ns', " ".join(commands['get-namespaces']))
         namespaces = output.splitlines()
         kmg = []
         others = []
@@ -99,7 +99,10 @@ def get_namespaces(kmg_filter):
                 kmg_i += 1
             p.cprint("r to return", p.bcolors.WARNING)
             p.cprint("q to quit", p.bcolors.WARNING)
+            p.cprint('Recently ran commands', p.bcolors.OKGREEN)
+            cache_actions()
             action = raw_input()
+            run_cache_action(action)
             if 'r' in action: return
             if 'q' in action: quit()
             get_pods_from_namespace(kmg[int(action)])
@@ -110,7 +113,10 @@ def get_namespaces(kmg_filter):
                 o_j += 1
             p.cprint("r to return", p.bcolors.WARNING)
             p.cprint("q to quit", p.bcolors.WARNING)
+            p.cprint('Recently ran commands', p.bcolors.OKGREEN)
+            cache_actions()
             action = raw_input()
+            run_cache_action(action)
             if 'r' in action: return
             if 'q' in action: quit()
             get_pods_from_namespace(others[int(action)])
@@ -123,7 +129,7 @@ def get_pods_from_namespace(namespace):
     p.cprint('Getting pods from ' + namespace + '...', p.bcolors.OKGREEN)
     commands["get-pods-from-namespace"][4] = namespace
     command = commands["get-pods-from-namespace"]
-    add_to_cache('get-pods', " ".join(command))
+    add_to_cache('pods', " ".join(command))
     output = subprocess.check_output(command).splitlines()
     # 1 indexed
     i = 1
@@ -138,7 +144,10 @@ def get_pods_from_namespace(namespace):
 
     p.cprint("r to return", p.bcolors.WARNING)
     p.cprint("q to quit", p.bcolors.WARNING)
+    p.cprint('Recently ran commands', p.bcolors.OKGREEN)
+    cache_actions()
     action = raw_input()
+    run_cache_action(action)
     if 'r' in action: return
     if 'q' in action: quit()
 
@@ -146,25 +155,29 @@ def get_pods_from_namespace(namespace):
     pod = pod[0:pod.index('  ')].strip()
 
     take_pod_action(namespace, pod)
+    p.cprint('Recently ran commands', p.bcolors.OKGREEN)
+    cache_actions()
 
 def take_pod_action(namespace, pod):
     p.cprint('Available actions for pod ' + pod + ' in namespace ' + namespace, p.bcolors.OKGREEN)
     p.cprint('[1] Interactive terminal', p.bcolors.WARNING)
     p.cprint('[2] Logs', p.bcolors.WARNING)
     p.cprint('q to quit', p.bcolors.WARNING)
+    p.cprint('Recently ran commands', p.bcolors.OKGREEN)
+    cache_actions()
 
     try:
         pod_action = raw_input()
+        run_cache_action(action)
         if 'q' in pod_action: quit()
         pod_action = int(pod_action)
         if pod_action == 1:
             command = commands['interactive-terminal']
             command[3] = namespace
             command[5] = pod
-            p.cprint("> Last Ran: " + " ".join(command), p.bcolors.OKGREEN)
             p.cprint('Opening interactive terminal for pod ' + pod, p.bcolors.OKGREEN)
             ouput = subprocess.check_call(command)
-            add_to_cache('terminal', " ".join(command))
+            add_to_cache('term', " ".join(command))
         elif pod_action == 2:
             command = commands['pod-logs']
             command[2] = namespace
@@ -182,6 +195,18 @@ def take_pod_action(namespace, pod):
 def add_to_cache(command_type, command):
     if command_type not in cache:
         cache[command_type] = command
+
+def cache_actions():
+    for key in cache:
+        p.cprint(key + ": " + cache[key], p.bcolors.WARNING)
+
+def run_cache_action(key):
+    if key in cache:
+        subprocess.check_call(cache[key])
+    else:
+        p.cprint('Error not a cached action', p.bcolors.FAIL)
+        return
+
 
 
 def test():
