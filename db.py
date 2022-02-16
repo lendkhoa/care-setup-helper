@@ -168,9 +168,9 @@ def take_pod_action(namespace, pod):
 
     try:
         pod_action = raw_input()
-        run_cache_action(action)
         if 'q' in pod_action: quit()
         pod_action = int(pod_action)
+        run_cache_action(pod_action)
         if pod_action == 1:
             command = commands['interactive-terminal']
             command[3] = namespace
@@ -203,11 +203,6 @@ def cache_actions():
 def run_cache_action(key):
     if key in cache:
         subprocess.check_call(cache[key])
-    else:
-        p.cprint('Error not a cached action', p.bcolors.FAIL)
-        return
-
-
 
 def test():
     subprocess.check_output(["./test.bsh"])
