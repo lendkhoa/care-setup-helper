@@ -32,7 +32,7 @@ def actions():
     p.cprint("[3] Connect to production - (VPN connection)", p.bcolors.WARNING)
     p.cprint("[4] Get namespaces", p.bcolors.WARNING)
     p.cprint("[5] Get KMG namespaces", p.bcolors.WARNING)
-    p.cprint("[6] Test", p.bcolors.WARNING)
+    p.cprint("[6] Show cache", p.bcolors.WARNING)
     p.cprint("\n q to quit", p.bcolors.WARNING)
 
 def main():
@@ -51,7 +51,7 @@ def main():
         elif '5' in action:
             get_namespaces('kmg')
         elif '6' in action:
-            test()
+            cache_actions()
         if 'q' in action:
             stop = True
             quit()
@@ -202,7 +202,7 @@ def cache_actions():
 
 def run_cache_action(key):
     if key in cache:
-        subprocess.check_call(cache[key])
+        subprocess.check_call(cache[key].split())
 
 def test():
     subprocess.check_output(["./test.bsh"])
