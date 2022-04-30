@@ -102,7 +102,8 @@ def get_namespaces(kmg_filter):
             p.cprint('Recently ran commands', p.bcolors.OKGREEN)
             cache_actions()
             action = raw_input()
-            run_cache_action(action)
+            if action in cache:
+                run_cache_action(action)
             if 'r' in action: return
             if 'q' in action: quit()
             get_pods_from_namespace(kmg[int(action)])
@@ -116,7 +117,8 @@ def get_namespaces(kmg_filter):
             p.cprint('Recently ran commands', p.bcolors.OKGREEN)
             cache_actions()
             action = raw_input()
-            run_cache_action(action)
+            if action in cache:
+                run_cache_action(action)
             if 'r' in action: return
             if 'q' in action: quit()
             get_pods_from_namespace(others[int(action)])
@@ -202,7 +204,10 @@ def cache_actions():
 
 def run_cache_action(key):
     if key in cache:
-        subprocess.check_call(cache[key].split())
+        print('>>>>>>>>>>>>>>>>')
+        print(cache[key].split())
+        print('>>>>>>>>>>>>>>>>')
+        # subprocess.check_output(cache[key].split())
 
 def test():
     subprocess.check_output(["./test.bsh"])
